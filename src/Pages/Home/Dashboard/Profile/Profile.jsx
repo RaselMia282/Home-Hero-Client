@@ -1,6 +1,6 @@
 import React from 'react';
 
-const TopServices = () => {
+const Profile = () => {
     return (
         <div>
             
@@ -8,4 +8,4 @@ const TopServices = () => {
     );
 };
 
-export default TopServices;
+export default Profile;

@@ -1,17 +1,40 @@
-import React from "react";
+import React, { use } from "react";
 import { NavItem } from "../NavItem/NavItem";
+import { AuthContext } from "../../Context/AuthContext";
+import { Link } from "react-router";
 const Navbar = () => {
+  const { user, logOut } = use(AuthContext);
+
+  const handleSignOut = () => {
+    logOut()
+      .then((result) => {
+        console.log(result.user);
+      })
+      .catch((err) => {
+        console.log(err.message);
+      });
+  };
   const links = (
     <>
       <li>
-        <NavItem to="/">Home</NavItem>
+        <NavItem to="/">HOME</NavItem>
       </li>
       <li>
-        <NavItem to="/login">Login</NavItem>
+        <NavItem to="/services">SERVICES</NavItem>
       </li>
       <li>
-        <NavItem to="/register">Register</NavItem>
+        <NavItem to="/dashboard">DASHBOARD</NavItem>
       </li>
+      {!user && (
+        <>
+          <li>
+            <NavItem to="/login">Login</NavItem>
+          </li>
+          <li>
+            <NavItem to="/register">Register</NavItem>
+          </li>
+        </>
+      )}
     </>
   );
 
@@ -44,7 +67,9 @@ const Navbar = () => {
             {links}
           </ul>
         </div>
-        <a className="btn btn-ghost text-xl">Home <span className="text-cyan-600">Hero</span></a>
+        <a className="btn btn-ghost text-xl">
+          Home <span className="text-cyan-600">Hero</span>
+        </a>
       </div>
       <div className="navbar-center hidden lg:flex">
         <ul className="menu menu-horizontal px-1">
@@ -52,8 +77,36 @@ const Navbar = () => {
           {links}
         </ul>
       </div>
-      <div className="navbar-end">
-        <a className="btn">Sign In</a>
+      <div className="navbar-end gap-4">
+        {user ? (
+          <>
+            <div
+              className="tooltip tooltip-bottom"
+              data-tip={user?.displayName || "UserName"}
+            >
+              <div className="avatar cursor-pointer">
+                <div className="w-12 rounded-full ring ring-cyan-500 ring-offset-base-100 ring-offset-2">
+                  <img src={user?.photoURL} alt="Profile" />
+                </div>
+              </div>
+            </div>
+            <div
+              onClick={handleSignOut}
+              className="px-5 py-2 bg-cyan-400 text-white cursor-pointer rounded-2xl "
+            >
+              Signout
+            </div>
+          </>
+        ) : (
+          <>
+            <Link
+              to="/login"
+              className="px-5 py-2 bg-cyan-400 text-white cursor-pointer rounded-2xl "
+            >
+              Login
+            </Link>
+          </>
+        )}
       </div>
     </div>
   );

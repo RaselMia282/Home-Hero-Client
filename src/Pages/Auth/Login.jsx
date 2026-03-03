@@ -1,22 +1,56 @@
-import React from 'react';
-import { Link } from 'react-router';
+import React, { use } from "react";
+import { Link, useNavigate } from "react-router";
 
-import { Mail, Lock, Eye, ArrowRight } from 'lucide-react';
+import { Mail, Lock, Eye, ArrowRight } from "lucide-react";
+import { AuthContext } from "../../Context/AuthContext";
 
 const Login = () => {
+  const { signIn, googleSignIn } = use(AuthContext);
+  const navigate = useNavigate();
+  const handleLogin = (e) => {
+    e.preventDefault();
+    const name = e.target.name.value;
+    const email = e.target.email.value;
+    const password = e.target.password.value;
+    console.log(name, email);
+
+    signIn(email, password)
+      .then((result) => {
+        console.log(result.user);
+        navigate("/");
+      })
+      .catch((err) => {
+        console.log(err.message);
+      });
+  };
+
+  // google login
+  const handleGoogleLogin = () => {
+    googleSignIn()
+      .then((result) => {
+        console.log(result.user);
+        navigate("/");
+      })
+      .catch((err) => {
+        console.log(err.message);
+      });
+  };
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
       {/* Main Card */}
       <div className="w-full max-w-[450px] bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
-        
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome back</h1>
-          <p className="text-gray-500">Enter your details to access your account</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Welcome back
+          </h1>
+          <p className="text-gray-500">
+            Enter your details to access your account
+          </p>
         </div>
 
         {/* Form */}
-        <form className="space-y-5">
+        <form onSubmit={handleLogin} className="space-y-5">
           {/* Email Field */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1.5 ml-1">
@@ -28,6 +62,7 @@ const Login = () => {
               </span>
               <input
                 type="email"
+                name="email"
                 placeholder="name@example.com"
                 className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-all"
               />
@@ -37,8 +72,13 @@ const Login = () => {
           {/* Password Field */}
           <div>
             <div className="flex justify-between mb-1.5 ml-1">
-              <label className="text-sm font-semibold text-gray-700">Password</label>
-              <button type="button" className="text-sm font-medium text-cyan-600 hover:underline">
+              <label className="text-sm font-semibold text-gray-700">
+                Password
+              </label>
+              <button
+                type="button"
+                className="text-sm font-medium text-cyan-600 hover:underline"
+              >
                 Forgot password?
               </button>
             </div>
@@ -48,10 +88,14 @@ const Login = () => {
               </span>
               <input
                 type="password"
+                name="password"
                 placeholder="••••••••"
                 className="w-full pl-10 pr-10 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-all"
               />
-              <button type="button" className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
+              <button
+                type="button"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+              >
                 <Eye size={18} />
               </button>
             </div>
@@ -62,8 +106,11 @@ const Login = () => {
             type="submit"
             className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-semibold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-500/20 group"
           >
-            Log In 
-            <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+            Log In
+            <ArrowRight
+              size={18}
+              className="group-hover:translate-x-1 transition-transform"
+            />
           </button>
         </form>
 
@@ -78,26 +125,37 @@ const Login = () => {
         </div>
 
         {/* Google Login */}
-        <button className="w-full border border-gray-200 hover:bg-gray-50 text-gray-700 font-semibold py-3 rounded-xl flex items-center justify-center gap-3 transition-all">
-          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/action/google.svg" alt="Google" className="w-5 h-5" />
+        <button
+          onClick={handleGoogleLogin}
+          className="w-full border border-gray-200 hover:bg-gray-50 text-gray-700 font-semibold py-3 rounded-xl flex items-center justify-center gap-3 transition-all"
+        >
+          <img
+            src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/action/google.svg"
+            alt="Google"
+            className="w-5 h-5"
+          />
           Google
         </button>
 
         {/* Switch to Register */}
-      <p className="mt-6 text-gray-600">
-        Don't have an account yet?{' '}
-        <Link to="/register" className="text-cyan-600 font-bold hover:underline">
-          Join HomeHero today
-        </Link>
-      </p>
+        <p className="mt-6 text-gray-600">
+          Don't have an account yet?{" "}
+          <Link
+            to="/register"
+            className="text-cyan-600 font-bold hover:underline"
+          >
+            Join HomeHero today
+          </Link>
+        </p>
 
         {/* Footer Policy */}
         <p className="mt-8 text-xs text-gray-500 leading-relaxed text-left border-t pt-6 border-gray-50">
-          By logging in, you agree to our <span className="text-cyan-600 cursor-pointer">Terms of Service</span> and <span className="text-cyan-600 cursor-pointer">Privacy Policy</span>.
+          By logging in, you agree to our{" "}
+          <span className="text-cyan-600 cursor-pointer">Terms of Service</span>{" "}
+          and{" "}
+          <span className="text-cyan-600 cursor-pointer">Privacy Policy</span>.
         </p>
       </div>
-
-      
     </div>
   );
 };
