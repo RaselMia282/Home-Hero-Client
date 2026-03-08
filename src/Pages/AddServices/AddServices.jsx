@@ -1,6 +1,6 @@
 import React from 'react';
 
-const AdService = () => {
+const AddServices = () => {
     return (
         <div>
             
@@ -8,4 +8,4 @@ const AdService = () => {
     );
 };
 
-export default AdService;
+export default AddServices;

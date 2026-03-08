@@ -49,7 +49,7 @@ const navigate = useNavigate();
 console.log(result);
 if(result.insertedId){
   alert("booking successful")
-  navigate("/dashboard/my-bookings")
+  navigate("/my-bookings")
 }
 
     })

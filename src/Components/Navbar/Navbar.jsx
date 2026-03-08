@@ -22,16 +22,33 @@ const Navbar = () => {
       <li>
         <NavItem to="/services">SERVICES</NavItem>
       </li>
-      <li>
-        <NavItem to="/dashboard">DASHBOARD</NavItem>
-      </li>
+
+      
+      {user && (
+        <>
+          <li>
+            <NavItem to="/add-service">ADD SERVICE</NavItem>
+          </li>
+          <li>
+            <NavItem to="/my-bookings">MY BOOKINGS</NavItem>
+          </li>
+          <li>
+            <NavItem to="/my-services">MY SERVICES</NavItem>
+          </li>
+          <li>
+            <NavItem to="/profile">PROFILE</NavItem>
+          </li>
+        </>
+      )}
+
+     
       {!user && (
         <>
           <li>
-            <NavItem to="/login">Login</NavItem>
+            <NavItem to="/login">LOGIN</NavItem>
           </li>
           <li>
-            <NavItem to="/register">Register</NavItem>
+            <NavItem to="/register">REGISTER</NavItem>
           </li>
         </>
       )}
