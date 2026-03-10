@@ -10,6 +10,7 @@ import Profile from "../Pages/Profile/Profile";
 import Login from "../Pages/Auth/Login";
 import Register from "../Pages/Auth/Register";
 import AddServices from "../Pages/AddServices/AddServices";
+import UpdateService from "../Pages/UpdateService/UpdateService";
 
 
 
@@ -62,6 +63,11 @@ export const router = createBrowserRouter([
       { 
         path: "/add-services",
         element: <AddServices></AddServices>
+      },
+      {
+       path:"/update-service/:id",
+       element:<UpdateService></UpdateService>,
+       loader: ({params})=> fetch(`http://localhost:3000/services/${params.id}`)
       },
     ]
   }

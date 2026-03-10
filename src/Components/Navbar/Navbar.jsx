@@ -27,7 +27,7 @@ const Navbar = () => {
       {user && (
         <>
           <li>
-            <NavItem to="/add-service">ADD SERVICE</NavItem>
+            <NavItem to="/add-services">ADD SERVICE</NavItem>
           </li>
           <li>
             <NavItem to="/my-bookings">MY BOOKINGS</NavItem>
