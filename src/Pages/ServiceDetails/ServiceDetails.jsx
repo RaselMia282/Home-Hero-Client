@@ -1,12 +1,15 @@
 import React, { use, useEffect, useState } from "react";
 import { useLoaderData, Link, useNavigate } from "react-router";
 import { AuthContext } from "../../Context/AuthContext";
+import Swal from "sweetalert2";
 
 const ServiceDetails = () => {
-  const {user}=use(AuthContext);
+  const { user } = use(AuthContext);
   const data = useLoaderData();
   const [relatedService, setRelatedService] = useState([]);
-const navigate = useNavigate();
+  const [isModalOpen, setIsModalOpen] = useState(false); 
+  const navigate = useNavigate();
+
   useEffect(() => {
     if (data?.category) {
       fetch(`http://localhost:3000/services`)
@@ -17,43 +20,50 @@ const navigate = useNavigate();
           setRelatedService(shuffled);
         });
     }
-    window.scrollTo(0, 0); 
+    window.scrollTo(0, 0);
   }, [data]);
-  const handleBookings=()=>{
-    if(!user?.email){
-      return alert ("login first")
-    }
 
-    const bookingInfo ={
-      serviceId : data._id,
-      skillName :data.skillName,
-      image :data.image,
-      price:data.price,
-      providerName:data.providerName,
-      providerEmail:data.providerEmail,
-      customerEmail:user.email,
-      customerName:user.displayName,
-      bookingDate:new Date().toLocaleDateString(),
-      status:"pending",
+  const handleBookings = () => {
+    if (!user?.email) {
+      return Swal.fire("Login Required", "Please login first to book a service!", "warning");
     }
+    setIsModalOpen(true); 
+  };
 
-    fetch("http://localhost:3000/bookings",{
-      method:"POST",
-      headers:{
-        "content-type":"application/json"
+  const handleConfirmBooking = (e) => {
+    e.preventDefault();
+    const form = e.target;
+
+    const bookingInfo = {
+      serviceId: data._id,
+      skillName: data.skillName,
+      image: data.image,
+      price: data.price,
+      providerName: data.providerName,
+      providerEmail: data.providerEmail,
+      customerEmail: user.email,
+      customerName: user.displayName,
+      bookingDate: form.date.value,
+      instruction: form.instruction.value, 
+      status: "pending",
+    };
+
+    fetch("http://localhost:3000/bookings", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
       },
-      body:JSON.stringify(bookingInfo)
+      body: JSON.stringify(bookingInfo),
     })
-    .then(res=>res.json())
-    .then(result=>{
-console.log(result);
-if(result.insertedId){
-  alert("booking successful")
-  navigate("/my-bookings")
-}
-
-    })
-  }
+      .then((res) => res.json())
+      .then((result) => {
+        if (result.insertedId) {
+          Swal.fire("Success!", "Service booked successfully!", "success");
+          setIsModalOpen(false); 
+          navigate("/my-bookings");
+        }
+      });
+  };
 
   const {
     image,
@@ -64,18 +74,16 @@ if(result.insertedId){
     providerName,
     price,
     slotsAvailable,
+    _id,
   } = data;
 
   return (
     <div className="container mx-auto px-4 py-10">
       <div className="grid grid-cols-12 gap-8">
-        
         {/* LEFT SIDE - 8 Columns */}
         <div className="col-span-12 lg:col-span-8 space-y-10">
-          
           {/* 1. Bento Gallery Section */}
           <div className="grid grid-cols-12 gap-4 h-[300px] md:h-[450px]">
-            {/* Main Big Image */}
             <div className="col-span-8 overflow-hidden rounded-3xl shadow-sm">
               <img
                 src={image}
@@ -83,7 +91,6 @@ if(result.insertedId){
                 className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
               />
             </div>
-            {/* Side Small Images */}
             <div className="col-span-4 grid grid-rows-2 gap-4">
               <div className="overflow-hidden rounded-3xl shadow-sm">
                 <img src={image} className="w-full h-full object-cover" alt="detail 1" />
@@ -91,7 +98,7 @@ if(result.insertedId){
               <div className="relative overflow-hidden rounded-3xl shadow-sm group cursor-pointer">
                 <img src={image} className="w-full h-full object-cover blur-[1px]" alt="detail 2" />
                 <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-                   <span className="text-white font-bold text-sm md:text-lg">View All Photos</span>
+                  <span className="text-white font-bold text-sm md:text-lg">View All Photos</span>
                 </div>
               </div>
             </div>
@@ -110,17 +117,15 @@ if(result.insertedId){
             <h1 className="text-4xl md:text-5xl font-black text-gray-900 mb-6 leading-tight">
               {skillName}
             </h1>
-            <p className="text-gray-600 leading-relaxed text-lg">
-              {description}
-            </p>
+            <p className="text-gray-600 leading-relaxed text-lg">{description}</p>
           </div>
 
-          {/* 3. Provider Profile Card (Now nice and wide) */}
+          {/* 3. Provider Profile Card */}
           <div className="bg-white border border-gray-100 rounded-[2rem] p-8 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-6">
               <div className="relative">
                 <div className="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center text-white text-3xl font-black shadow-lg">
-                  {providerName[0]}
+                  {providerName ? providerName[0] : "P"}
                 </div>
                 <div className="absolute bottom-1 right-1 w-5 h-5 bg-green-500 border-4 border-white rounded-full"></div>
               </div>
@@ -128,7 +133,9 @@ if(result.insertedId){
                 <div className="flex items-center gap-2 mb-1">
                   <h4 className="text-2xl font-bold text-gray-800">{providerName}</h4>
                   <span className="text-blue-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                    </svg>
                   </span>
                 </div>
                 <p className="text-gray-500 font-medium">Professional Expert Instructor</p>
@@ -146,26 +153,9 @@ if(result.insertedId){
               </div>
             </div>
           </div>
-
-          {/* 4. FAQ Section */}
-          <div className="space-y-6">
-            <h3 className="text-2xl font-bold text-gray-800">Frequently Asked Questions</h3>
-            <div className="join join-vertical w-full bg-white border border-gray-100 rounded-3xl overflow-hidden">
-              <div className="collapse collapse-arrow join-item border-b border-gray-100">
-                <input type="radio" name="my-accordion-4" defaultChecked /> 
-                <div className="collapse-title text-lg font-bold text-gray-700">What is included in this service?</div>
-                <div className="collapse-content text-gray-500"><p>Comprehensive 60-minute session with all materials.</p></div>
-              </div>
-              <div className="collapse collapse-arrow join-item border-b border-gray-100">
-                <input type="radio" name="my-accordion-4" /> 
-                <div className="collapse-title text-lg font-bold text-gray-700">Can I reschedule my booking?</div>
-                <div className="collapse-content text-gray-500"><p>Yes, up to 24 hours before the session.</p></div>
-              </div>
-            </div>
-          </div>
         </div>
 
-        {/* RIGHT SIDE - 4 Columns (Sticky Booking Card) */}
+        {/* RIGHT SIDE - Sticky Booking Card */}
         <div className="col-span-12 lg:col-span-4">
           <div className="border border-gray-100 rounded-[2.5rem] p-8 shadow-xl sticky top-10 bg-white space-y-6">
             <div>
@@ -187,27 +177,55 @@ if(result.insertedId){
             <button onClick={handleBookings} className="btn btn-primary w-full h-16 rounded-2xl text-xl font-black shadow-lg shadow-blue-200">
               Book This Service
             </button>
-            <p className="text-center text-xs text-gray-400 font-medium italic">
-              * Secure payment & instant confirmation
-            </p>
+            <p className="text-center text-xs text-gray-400 font-medium italic">* Secure payment & instant confirmation</p>
           </div>
         </div>
       </div>
 
-      {/* Related Services - Full Width Bottom */}
-      <div className="mt-24 pt-16 border-t border-gray-100">
-        <div className="mb-12">
-          <h2 className="text-4xl font-black text-gray-900 tracking-tight">Related Services</h2>
-          <p className="text-gray-500 mt-2 text-lg font-medium">Explore more skills that might interest you.</p>
-        </div>
+      {/* Booking Modal */}
+      {isModalOpen && (
+        <dialog open className="modal modal-bottom sm:modal-middle">
+          <div className="modal-box bg-white rounded-3xl p-8">
+            <h3 className="font-black text-2xl mb-4 text-gray-800 text-center">Confirm Your Booking</h3>
+            <form onSubmit={handleConfirmBooking} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="form-control">
+                  <label className="label text-xs font-bold uppercase text-gray-400">Service Name</label>
+                  <input type="text" value={skillName} readOnly className="input input-bordered bg-gray-50 font-bold" />
+                </div>
+                <div className="form-control">
+                  <label className="label text-xs font-bold uppercase text-gray-400">Price</label>
+                  <input type="text" value={`$${price}`} readOnly className="input input-bordered bg-gray-50 font-bold text-blue-600" />
+                </div>
+              </div>
+              <div className="form-control">
+                <label className="label text-xs font-bold uppercase text-gray-400">Service Taking Date</label>
+                <input type="date" name="date" required className="input input-bordered focus:border-blue-500" />
+              </div>
+              <div className="form-control">
+                <label className="label text-xs font-bold uppercase text-gray-400">Special Instructions</label>
+                <textarea
+                  name="instruction"
+                  placeholder="Address or specific requirements..."
+                  className="textarea textarea-bordered h-24 focus:border-blue-500"
+                  required
+                ></textarea>
+              </div>
+              <div className="modal-action gap-4">
+                <button type="button" onClick={() => setIsModalOpen(false)} className="btn btn-ghost flex-1 rounded-xl font-bold">Cancel</button>
+                <button type="submit" className="btn btn-primary flex-1 rounded-xl font-black text-lg shadow-lg">Purchase</button>
+              </div>
+            </form>
+          </div>
+        </dialog>
+      )}
 
+      {/* Related Services */}
+      <div className="mt-24 pt-16 border-t border-gray-100">
+        <h2 className="text-4xl font-black text-gray-900 mb-12">Related Services</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {relatedService.slice(0, 4).map((service) => (
-            <Link
-              to={`/service-details/${service._id}`}
-              key={service._id}
-              className="group bg-white border border-gray-100 rounded-[2rem] overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition-all duration-500"
-            >
+            <Link to={`/service-details/${service._id}`} key={service._id} className="group bg-white border border-gray-100 rounded-[2rem] overflow-hidden hover:shadow-2xl transition-all duration-500">
               <div className="h-48 overflow-hidden">
                 <img src={service.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={service.skillName} />
               </div>
